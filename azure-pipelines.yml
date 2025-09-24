@@ -81,7 +81,7 @@ stages:
       vmImage: 'ubuntu-22.04'
     environment: dev-env-001
     variables:
-    - group: Release
+    - group: WepAppEnvironmentVariables
     strategy:
       runOnce:
         deploy:
