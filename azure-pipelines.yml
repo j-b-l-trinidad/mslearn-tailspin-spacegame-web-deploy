@@ -89,7 +89,7 @@ stages:
       vmImage: 'ubuntu-22.04'
     environment: dev-env-001
     variables:
-    - group: 'WepAppEnvironmentVariables'
+    - group: WepAppEnvironmentVariables
     strategy:
       runOnce:
         deploy:
@@ -113,7 +113,7 @@ stages:
       vmImage: 'ubuntu-22.04'
     environment: test-env-001
     variables:
-    - group: 'WepAppEnvironmentVariables'
+    - group: WepAppEnvironmentVariables
     strategy:
       runOnce:
         deploy:
@@ -123,8 +123,6 @@ stages:
           - task: AzureWebApp@1
             displayName: 'Azure App Service Deploy: website'
             inputs:
-              azureSubscription: ''ado-web-app-service-connection''
+              azureSubscription: 'ado-web-app-service-connection'
               appName: '$(var_test)'
               package: '$(Pipeline.Workspace)/drop/$(buildConfiguration)/*.zip'
-
-    # a
