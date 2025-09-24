@@ -87,7 +87,7 @@ stages:
   - deployment: Deploy
     pool:
       vmImage: 'ubuntu-22.04'
-    environment: dev-env
+    environment: dev-env-001
     variables:
     - group: WepAppEnvironmentVariables
     strategy:
@@ -111,7 +111,7 @@ stages:
   - deployment: Deploy
     pool:
       vmImage: 'ubuntu-22.04'
-    environment: test-env
+    environment: test-env-001
     variables:
     - group: WepAppEnvironmentVariables
     strategy:
@@ -134,7 +134,7 @@ stages:
   - deployment: Deploy
     pool:
       vmImage: 'ubuntu-22.04'
-    environment: staging-env
+    environment: staging-env-001
     variables:
     - group: WepAppEnvironmentVariables
     strategy:
