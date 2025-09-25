@@ -6,6 +6,7 @@ using OpenQA.Selenium.Firefox;
 using OpenQA.Selenium.Support.UI;
 using System;
 using System.Collections;
+using System.IO;
 
 namespace UITests
 {
@@ -27,22 +28,21 @@ namespace UITests
         {
             try
             {
+                browser = "Edge";
+                string path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory);
+
                 // Create the driver for the current browser.
                 switch(browser)
                 {
                   case "Chrome":
-                    driver = new ChromeDriver(
-                        Environment.GetEnvironmentVariable("ChromeWebDriver")
-                    );
+                    driver = new ChromeDriver(path);
                     break;
                   case "Firefox":
-                    driver = new FirefoxDriver(
-                        Environment.GetEnvironmentVariable("GeckoWebDriver")
-                    );
+                    driver = new FirefoxDriver(path);
                     break;
                   case "Edge":
                     driver = new EdgeDriver(
-                        Environment.GetEnvironmentVariable("EdgeWebDriver"),
+                        path,
                         new EdgeOptions
                         {
                             UseChromium = true
@@ -60,7 +60,10 @@ namespace UITests
                 // The site name is stored in the SITE_URL environment variable to make 
                 // the tests more flexible.
                 string url = Environment.GetEnvironmentVariable("SITE_URL");
-                driver.Navigate().GoToUrl(url + "/");
+                //string url = "https://localhost:51842/";
+                var nav = driver.Navigate();
+
+                nav.GoToUrl(url);   
 
                 // Wait for the page to be completely loaded.
                 new WebDriverWait(driver, TimeSpan.FromSeconds(10))
@@ -72,9 +75,9 @@ namespace UITests
             {
                 Console.WriteLine("DriverServiceNotFoundException");
             }
-            catch (WebDriverException)
+            catch (WebDriverException ex)
             {
-                Console.WriteLine("WebDriverException");
+                Console.WriteLine($"WebDriverException - {ex.Message}");
                 Cleanup();
             }
         }
