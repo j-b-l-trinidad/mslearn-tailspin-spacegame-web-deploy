@@ -59,8 +59,8 @@ namespace UITests
                 // Navigate to the site.
                 // The site name is stored in the SITE_URL environment variable to make 
                 // the tests more flexible.
-                string url = Environment.GetEnvironmentVariable("SITE_URL");
-                //string url = "https://localhost:51842/";
+                //string url = Environment.GetEnvironmentVariable("SITE_URL");
+                string url = "https://ado-web-app-test-env-001-hbbeddhfd2e2cacb.canadacentral-01.azurewebsites.net/";
                 var nav = driver.Navigate();
 
                 nav.GoToUrl(url);   
