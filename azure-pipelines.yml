@@ -11,13 +11,13 @@ stages:
   - job: 'Build'
     displayName: 'Build job'
     pool:
-      vmImage: 'ubuntu-20.04'
+      vmImage: 'ubuntu-22.04'
       demands:
       - npm
 
     variables:
       wwwrootDir: 'Tailspin.SpaceGame.Web/wwwroot'
-      dotnetSdkVersion: '5.x'
+      dotnetSdkVersion: '8.x'
 
     steps:
     - task: UseDotNet@2
@@ -71,10 +71,10 @@ stages:
   jobs:
   - deployment: Deploy
     pool:
-      vmImage: 'ubuntu-20.04'
-    environment: dev
+      vmImage: 'ubuntu-22.04'
+    environment: dev-env-001
     variables:
-    - group: Release
+    - group: WepAppEnvironmentVariables
     strategy:
       runOnce:
         deploy:
@@ -84,8 +84,8 @@ stages:
           - task: AzureWebApp@1
             displayName: 'Azure App Service Deploy: website'
             inputs:
-              azureSubscription: 'Resource Manager - Tailspin - Space Game'
-              appName: '$(WebAppNameDev)'
+              azureSubscription: 'ado-web-app-service-connection'
+              appName: '$(var_dev)'
               package: '$(Pipeline.Workspace)/drop/$(buildConfiguration)/*.zip'
 
 - stage: 'Test'
@@ -94,10 +94,10 @@ stages:
   jobs:
   - deployment: Deploy
     pool:
-      vmImage: 'ubuntu-20.04'
-    environment: test
+      vmImage: 'ubuntu-22.04'
+    environment: test-env-001
     variables:
-    - group: 'Release'
+    - group: 'WepAppEnvironmentVariables'
     strategy:
       runOnce:
         deploy:
@@ -107,8 +107,8 @@ stages:
           - task: AzureWebApp@1
             displayName: 'Azure App Service Deploy: website'
             inputs:
-              azureSubscription: 'Resource Manager - Tailspin - Space Game'
-              appName: '$(WebAppNameTest)'
+              azureSubscription: 'ado-web-app-service-connection'
+              appName: '$(var_test)'
               package: '$(Pipeline.Workspace)/drop/$(buildConfiguration)/*.zip'
 
 - stage: 'Staging'
@@ -117,10 +117,10 @@ stages:
   jobs:
   - deployment: Deploy
     pool:
-      vmImage: 'ubuntu-20.04'
-    environment: staging
+      vmImage: 'ubuntu-22.04'
+    environment: staging-env-001
     variables:
-    - group: 'Release'
+    - group: 'WepAppEnvironmentVariables'
     strategy:
       runOnce:
         deploy:
@@ -130,6 +130,29 @@ stages:
           - task: AzureWebApp@1
             displayName: 'Azure App Service Deploy: website'
             inputs:
-              azureSubscription: 'Resource Manager - Tailspin - Space Game'
-              appName: '$(WebAppNameStaging)'
+              azureSubscription: 'ado-web-app-service-connection'
+              appName: '$(var_staging)'
               package: '$(Pipeline.Workspace)/drop/$(buildConfiguration)/*.zip'
+  - job: RunLoadTests
+    dependsOn: Deploy
+    displayName: 'Run load tests'
+    pool:
+      vmImage: 'ubuntu-22.04'
+    variables:
+    - group: WepAppEnvironmentVariables
+    steps:
+    - script: |
+        wget -c archive.apache.org/dist/jmeter/binaries/apache-jmeter-$(var_jmeter_version).tgz
+        tar -xzf apache-jmeter-$(var_jmeter_version).tgz
+      displayName: 'Install Apache JMeter'
+    - script: apache-jmeter-$(var_jmeter_version)/bin/./jmeter -n -t LoadTest.jmx -o Results.xml -Jhostname=$(var_staging_link)
+      displayName: 'Run Load tests'
+    - script: |
+        sudo apt-get update
+        sudo apt-get install xsltproc
+        xsltproc JMeter2JUnit.xsl Results.xml > JUnit.xml
+      displayName: 'Transform JMeter output to JUnit'
+    - task: PublishTestResults@2
+      inputs:
+        testResultsFormat: JUnit
+        testResultsFiles: JUnit.xml
