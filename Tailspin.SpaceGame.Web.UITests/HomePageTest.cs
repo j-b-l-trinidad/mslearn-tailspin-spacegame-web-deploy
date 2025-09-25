@@ -53,7 +53,7 @@ namespace UITests
                     throw new ArgumentException($"'{browser}': Unknown browser");
                 }
 
-                // Wait until the page is fully loaded on every page navigation or page reload.
+                // Wait until the page is fully loaded on every page navigation or page reload.n
                 driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(20);
 
                 // Navigate to the site.
